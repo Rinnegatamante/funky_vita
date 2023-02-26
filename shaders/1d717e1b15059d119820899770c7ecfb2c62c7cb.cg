@@ -1,0 +1,21 @@
+#define _ANDROID
+#define ANDROID_TEGRA_FIX
+#define LIGHTING
+
+void main(
+	float4 colorVarying : COLOR,
+	float2 uv0Varying : TEXCOORD0,
+	float4 out gl_FragColor : COLOR
+) {
+	float4 color=colorVarying;
+	
+	float4 txt=float4(1.0,1.0,1.0,1.0);
+
+	color*=txt;
+
+#if defined(ANDROID_TEGRA_FIX) && defined(_ANDROID)
+	color*=float4(1.0001,1.0001,1.0001,1.0);
+#endif
+
+	gl_FragColor=color;
+}

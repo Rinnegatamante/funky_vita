@@ -1,0 +1,23 @@
+#define _ANDROID
+#define TEXTURE
+
+uniform float4x4 ModelViewProjMatrix;
+uniform float4 ConstantColor;
+uniform float4 MappingScale;
+uniform float4 MappingOffset;
+
+void main(
+	float3 Position,
+	float2 UV0,
+	float4 out colorVarying : COLOR,
+	float4 out uv0Varying : TEXCOORD0,
+	float4 out gl_Position : POSITION
+) {
+	float3 pos=Position;
+
+    gl_Position = mul(float4(pos,1), ModelViewProjMatrix);
+    colorVarying = ConstantColor;
+#ifdef TEXTURE
+	uv0Varying = float4(UV0,UV0)*MappingScale+MappingOffset;
+#endif
+}

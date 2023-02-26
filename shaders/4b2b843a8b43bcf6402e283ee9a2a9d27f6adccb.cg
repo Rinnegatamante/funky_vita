@@ -1,0 +1,14 @@
+#define _ANDROID
+
+float4 main(
+	float4 colorVarying : COLOR,
+	float2 uv0Varying : TEXCOORD0
+) {
+	float4 color=colorVarying;
+	
+	float4 txt=float4(1.0,1.0,1.0,1.0);
+
+	color*=txt;
+
+	return color;
+}

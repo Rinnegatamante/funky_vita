@@ -1,0 +1,42 @@
+#define _ANDROID
+#define ENV_MAP
+#define TWO_SIDED_LIGHTING
+
+uniform float4 ScreenColorRange[2];
+
+uniform float4x4 ModelViewProjMatrix;
+#ifdef ENV_MAP
+	uniform float4 ObjectSpaceEyePosition;
+	uniform float4x4 ModelMatrix;
+#endif
+uniform float4 ConstantColor;
+uniform float4 MappingTransform;
+uniform float4 SunParams[3];
+uniform float4 SunDirection;
+
+void main(
+	float3 Position,
+	float3 Normal,
+	float2 UV0,
+	float4 out gl_Position : POSITION,
+	float4 out colorVarying : COLOR,
+	float2 out uv0Varying : TEXCOORD0,
+	float3 out reflectedVector : TEXCOORD1
+) {
+	float3 pos=Position;
+	float3 nor=Normal;
+
+	float4 pos4=float4(pos,1);
+	gl_Position=mul(pos4,ModelViewProjMatrix);
+	float4 color=ConstantColor;
+
+	uv0Varying = UV0*MappingTransform.xy+MappingTransform.zw;
+
+#ifdef ENV_MAP
+	float3 toEyeVector=pos-ObjectSpaceEyePosition.xyz;
+	float3 refl=reflect(toEyeVector,nor);
+	reflectedVector=(mul(float4(refl,0),ModelMatrix)).xyz;
+#endif
+
+    colorVarying=color;
+}

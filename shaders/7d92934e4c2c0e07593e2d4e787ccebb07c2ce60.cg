@@ -1,0 +1,21 @@
+#define _ANDROID
+#define HEALTHBAR_MODE2
+
+uniform sampler2D Texture0;
+
+void main(
+	float4 colorVarying : COLOR,
+	float2 uv0Varying : TEXCOORD0,
+	float4 progressAndAltColor : TEXCOORD1,
+	float4 out gl_FragColor : COLOR
+)
+{
+	float4 color=colorVarying;
+	float4 txt=tex2D(Texture0,uv0Varying);
+
+	color.xyz=lerp(progressAndAltColor.xyz,color.xyz,step(0.0,progressAndAltColor.w));
+	color*=txt;
+
+	gl_FragColor=color;
+}
+

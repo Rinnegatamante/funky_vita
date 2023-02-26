@@ -1,0 +1,26 @@
+#define _ANDROID
+#define DENORMALIZATION
+
+uniform float4x4 ModelViewProjMatrix;
+uniform float4 ConstantColor;
+uniform float4 MappingScale;
+uniform float4 MappingOffset;
+
+#ifdef DENORMALIZATION
+	uniform float4 VertexDenormalizationBox[2];
+#endif
+
+void main(
+	float3 Position,
+	float4 out colorVarying : COLOR,
+	float4 out gl_Position : POSITION
+) {
+#ifdef DENORMALIZATION
+	float3 pos=VertexDenormalizationBox[0].xyz+Position*VertexDenormalizationBox[1].xyz;
+#else
+	float3 pos=Position;
+#endif
+
+    gl_Position = mul(float4(pos,1), ModelViewProjMatrix);
+    colorVarying = ConstantColor;
+}

@@ -1,0 +1,31 @@
+#define _ANDROID
+#define TWO_SIDED_LIGHTING
+
+uniform float4 ScreenColorRange[2];
+
+uniform float4x4 ModelViewProjMatrix;
+
+uniform float4 ConstantColor;
+uniform float4 MappingTransform;
+uniform float4 SunParams[3];
+uniform float4 SunDirection;
+
+void main(
+	float3 Position,
+	float3 Normal,
+	float2 UV0,
+	float4 out colorVarying : COLOR,
+	float2 out uv0Varying : TEXCOORD0,
+	float4 out gl_Position : POSITION
+) {
+	float3 pos=Position;
+	float3 nor=Normal;
+
+	float4 pos4=float4(pos,1);
+	gl_Position=mul(pos4,ModelViewProjMatrix);
+	float4 color=ConstantColor;
+
+	uv0Varying = UV0*MappingTransform.xy+MappingTransform.zw;
+
+    colorVarying=color;
+}

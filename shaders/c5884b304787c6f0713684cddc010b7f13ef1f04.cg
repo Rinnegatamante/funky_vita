@@ -1,0 +1,76 @@
+#define _ANDROID
+#define RANDOM_TEXTURE_FRAME
+#define TEXTURE_ANIMATION
+
+uniform float4x4 ModelViewProjMatrix;
+uniform float4 ConstantColor;
+uniform float4 UserVSHParams[12];
+uniform float4 ParticleVectors[4];
+
+void main(
+	float4 Position,
+	float3 Normal,
+	float4 BlendWeight,
+	float4 BlendIndices,
+	float4 out colorVarying : COLOR,
+	float4 out uv : TEXCOORD0,
+	float4 out gl_Position : POSITION
+) {
+	float3 pos=Position.xyz;
+	float4 sizeVector=UserVSHParams[5];
+	float4 anchorAndRotationSpeedVector=UserVSHParams[6];
+	float4 shapeVector=UserVSHParams[7];
+	float4 timeVector=UserVSHParams[0];
+	float4 textureScalingVector=UserVSHParams[8];
+	float4 ooNodeTimeStepVector=UserVSHParams[9];
+
+	float2 ind=step(timeVector.yz,Position.ww);
+	int node=int(ind.x+ind.y);
+
+	float factor=clamp((Position.w-timeVector[node])*ooNodeTimeStepVector[node],0.0,1.0);
+	
+	float4 c1=ParticleVectors[node];			// color variables have been moved to ParticleVectors register due to ipad2 glsl crash
+	float4 c2=ParticleVectors[node+1];
+	float4 color=lerp(c1,c2,factor);
+
+	float size=lerp(sizeVector[node],sizeVector[node+1],factor);
+	
+	float2 billboardSize=(BlendWeight.xy-anchorAndRotationSpeedVector.xy)*size;
+	billboardSize*=lerp(shapeVector.xy,shapeVector.zw,BlendIndices.x);
+
+	float3 b1=UserVSHParams[10].xyz;
+	float3 b2=UserVSHParams[11].xyz;
+	
+	pos+=b1*billboardSize.x+b2*billboardSize.y;
+    gl_Position = mul(float4(pos,1),ModelViewProjMatrix);
+	colorVarying=color*ConstantColor;
+
+#ifdef TEXTURE_ANIMATION
+	float frameFloat=BlendIndices.w;
+	frameFloat*=textureScalingVector.z;
+	float2 frameNo;
+	#ifdef TEXTURE_FRAME_INTERPOLATION
+		frameNo.x=floor(frameFloat);
+		frameFactor=frameFloat-frameNo.x;
+
+		frameNo.y=min(frameNo.x+1.0,textureScalingVector.z-1.0);
+	#else
+		frameNo.xy=floor(float2(frameFloat,frameFloat));
+
+	#endif
+
+	float4 frameIndex;
+	
+	float2 tmp=textureScalingVector.xx*frameNo;
+	frameIndex.yw=floor(tmp);
+	frameIndex.xz=tmp-frameIndex.yw;
+
+	
+	frameIndex.xz=floor(frameIndex.xz*textureScalingVector.ww);
+	
+
+	uv=(BlendWeight.xyxy+frameIndex)*textureScalingVector.xyxy;
+#else
+	uv=BlendWeight.xyxy;
+#endif	
+}

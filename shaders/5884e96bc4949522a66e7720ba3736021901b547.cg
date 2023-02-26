@@ -1,0 +1,11 @@
+#define _ANDROID
+#define NO_TEXTURE
+
+float4 main(
+	float4 colorVarying : COLOR
+) {
+	float4 color=colorVarying;
+
+	return color;
+}
+
