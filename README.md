@@ -12,6 +12,11 @@ This wrapper has been tested only with v.1.06 since it's the sole version [still
 
 ## Changelog
 
+### v1.1
+
+- Moved to precompiled shaders usage. Makes loading times much faster.
+- Made so that it's possible to pause game by pressing the Start button.
+
 ### v1.0
 
 - Initial release.
