@@ -752,7 +752,7 @@ void glShaderSource_hook(GLuint shader, GLsizei count, const GLchar **string, co
 	snprintf(sha_name, sizeof(sha_name), "%08x%08x%08x%08x%08x", sha1[0], sha1[1], sha1[2], sha1[3], sha1[4]);
 
 	char cg_path[128];
-	snprintf(cg_path, sizeof(cg_path), "app0:/shaders/%s.gxp", sha_name);
+	snprintf(cg_path, sizeof(cg_path), "app0:/shaders/%s.cg.gxp", sha_name);
 
 	FILE *file = fopen(cg_path, "rb");
 	//printf("Shader: %s\n", sha_name);
@@ -764,9 +764,9 @@ void glShaderSource_hook(GLuint shader, GLsizei count, const GLchar **string, co
 		}
 		fclose(file);
 		if (strstr(string[1], "gl_FragColor"))
-			file = fopen("app0:/shaders/4b2b843a8b43bcf6402e283ee9a2a9d27f6adccb.gxp", "rb");
+			file = fopen("app0:/shaders/4b2b843a8b43bcf6402e283ee9a2a9d27f6adccb.cg.gxp", "rb");
 		else
-			file = fopen("app0:/shaders/487c6a4235e2d026c576d82f0ad6ea110e7a7b9f.gxp", "rb");
+			file = fopen("app0:/shaders/487c6a4235e2d026c576d82f0ad6ea110e7a7b9f.cg.gxp", "rb");
 	}
 		
 	fseek(file, 0, SEEK_END);
@@ -1307,6 +1307,7 @@ int ctrl_thread(SceSize args, void *argp) {
 
 	int lastX[2] = { -1, -1 };
 	int lastY[2] = { -1, -1 };
+	int lastStart = 0;
 
 	while (1) {
 		SceTouchData touch;
@@ -1330,6 +1331,17 @@ int ctrl_thread(SceSize args, void *argp) {
 				lastY[i] = -1;
 			}
 		}
+		
+		SceCtrlData pad;
+		sceCtrlPeekBufferPositive(0, &pad, 1);
+		int currStart = (pad.buttons & SCE_CTRL_START) ? 1 : 0;
+		if (currStart != lastStart) {
+			if (!lastStart)
+				Java_com_android_Game11Bits_GameLib_touchDown(fake_env, NULL, touch.reportNum, 930, 515);
+			else
+				Java_com_android_Game11Bits_GameLib_touchUp(fake_env, NULL, touch.reportNum, 930, 515);
+		}
+		lastStart = currStart;
 
 		sceKernelDelayThread(1000);
 	}
