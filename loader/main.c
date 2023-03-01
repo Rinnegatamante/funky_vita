@@ -752,7 +752,7 @@ void glShaderSource_hook(GLuint shader, GLsizei count, const GLchar **string, co
 	snprintf(sha_name, sizeof(sha_name), "%08x%08x%08x%08x%08x", sha1[0], sha1[1], sha1[2], sha1[3], sha1[4]);
 
 	char cg_path[128];
-	snprintf(cg_path, sizeof(cg_path), "app0:/shaders/%s.cg", sha_name);
+	snprintf(cg_path, sizeof(cg_path), "app0:/shaders/%s.gxp", sha_name);
 
 	FILE *file = fopen(cg_path, "rb");
 	//printf("Shader: %s\n", sha_name);
@@ -764,9 +764,9 @@ void glShaderSource_hook(GLuint shader, GLsizei count, const GLchar **string, co
 		}
 		fclose(file);
 		if (strstr(string[1], "gl_FragColor"))
-			file = fopen("app0:/shaders/4b2b843a8b43bcf6402e283ee9a2a9d27f6adccb.cg", "rb");
+			file = fopen("app0:/shaders/4b2b843a8b43bcf6402e283ee9a2a9d27f6adccb.gxp", "rb");
 		else
-			file = fopen("app0:/shaders/487c6a4235e2d026c576d82f0ad6ea110e7a7b9f.cg", "rb");
+			file = fopen("app0:/shaders/487c6a4235e2d026c576d82f0ad6ea110e7a7b9f.gxp", "rb");
 	}
 		
 	fseek(file, 0, SEEK_END);
@@ -776,8 +776,12 @@ void glShaderSource_hook(GLuint shader, GLsizei count, const GLchar **string, co
 	fread(buf, 1, size, file);
 	fclose(file);
 	buf[size] = 0;
-	glShaderSource(shader, 1, &buf, NULL);
+	glShaderBinary(1, &shader, 0, buf, size);
+	//glShaderSource(shader, 1, &buf, NULL);
 	free(buf);
+}
+
+void glCompileShader_hook(GLuint prog) {	
 }
 
 int usleep_hook(useconds_t usec) {
@@ -966,7 +970,7 @@ static so_default_dynlib default_dynlib[] = {
 	{ "glClearDepthf", (uintptr_t)&glClearDepthf },
 	{ "glClearStencil", (uintptr_t)&glClearStencil },
 	{ "glColorMask", (uintptr_t)&glColorMask },
-	{ "glCompileShader", (uintptr_t)&glCompileShader },
+	{ "glCompileShader", (uintptr_t)&glCompileShader_hook },
 	{ "glCompressedTexImage2D", (uintptr_t)&glCompressedTexImage2DHook },
 	{ "glCreateProgram", (uintptr_t)&glCreateProgram },
 	{ "glCreateShader", (uintptr_t)&glCreateShader },
